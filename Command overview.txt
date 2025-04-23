@@ -1,0 +1,484 @@
+In Linux zijn er verschillende shells: hier wordt bash gebruikt
+In cli, kijk in welke user je ziet:
+    user@host:location$
+    ~: home directory user
+    #: root directory
+        to change : su -username
+        to do a commado as root: sudo of su cmd
+        in what directory: cmd pwd
+        change directory: cd 'directory name' ; no name results in home directory 
+        to refer with path: 
+            . current directory
+            ..one higher directory
+
+Commando overzicht:
+
+    commando [opties]       [argumenten]
+    ls          -l
+    ls          -lah                             samengezette opties
+    ls          --human-readable                 hele woorden; voorafgaand met --
+    ls          -l          --color=auto         eigen argumenten
+
+    command ls
+        list the content of the directory
+        options
+            -a : toont ook verborgen dotbestanfen
+            -l : toont metadata
+            --group-directories-first: list directories forst
+            -h : filesize meer leesbaar
+            -d : toont enkel directory (met -l combi voor info ober directory)
+            -R : inhoud van subdirectories tonen
+            -S : sort filesize
+            -r : reverse the sort
+            --full-time : complete timestamp
+
+
+Er zijn interne (in shell) en externe commando (toont locatie): 
+    check voor een commando: 
+        type "commando"
+    toon alle locaties (en aliases)
+        type -a "command"                 type -a echo results in: exho is a shell builtin/ exho is /bin/echo
+alias or shortcut for a command (ls: ls --color=auto)
+    show all aliases
+        alias
+    disable alias: 
+        \ or command "command"
+    remove for current session
+        unalias "command"
+    remove permanantly: edit in root diectory and restart shell
+    create alias    
+        alias name="command"
+
+handige commando: history
+    history     (-)3                            show last 3 cmds
+    !3                                          command on line 3 of the history list
+    !!                                          last command (handy for sudo)
+    !"command"                                    last excecuted incl options
+Global/Environment variable
+    export $HISTSIZE=input                      set the size of the command history
+    unset $HISTSIZE=input                       remove
+
+Use variables: temp stored
+    variable=value                              Animal="penguin"
+    retrieve the value with echo $variable      echo $Animal  (result in penguin)
+to see environmetal variable:
+    env or printenv
+to make: export $ENV VAR / to remove: unset $ENV VAR
+
+Handige variable: $PATH : bevat alle directories met uitvoerbare cmds, gescheiden door :
+    directory toevoegen (for current session):
+        export PATH=newdirectory:$PATH
+Functies: in combinate met bestaande commando
+    nieuwe cmds aanmaken
+    bestaande cmds vervangen
+    samen met aliases, vaak bewaard in initialisatiebestanden: laden bij starten
+    
+Differentiate between the quotes:
+    " " : negeert glob characters (*,?), maar niet variablen
+    ' ' : negeert alle specials, alleen letterlijke tekst
+    ` ` : uitvoeren en output van een commando in een andere commando  i.e: vandaag is `date`
+    \   : 1 char niet interpreteren
+    ;   : meerdere commando, ion volgorde uitvoeren
+    &&  : logical 'and': eerste cmd succes, voer 2de uit
+    |   : logical 'or' : als cmd 1 succes, stop | als cmd 1 faalt, voer cmd 2 uit
+
+Glob characters: speciale symbolen voor shell, om multiple files te selecteren/maipuleren
+    *   :0 of meerder char
+    ?   :precies 1 char
+    []  :selectie specifieke char
+    [-] :reeks char, alfabetisch
+    [!] :niet deze char
+
+Alles in Linux is eigenlijk een bestand, dus aantal belangrijke cmds:
+copy files 
+    cp [source][destination] (destination kan nieuwe bestandsnaam zijn aka hernoemen)
+    opties
+        -v :verbose = toont output bij succes
+        -i :vraag bevestiging voor overschrijven
+        -n :automatisch niet overschrijven
+        -r :kopieert directories & hun inhoud
+move files
+    mv [source][destination]  (destination kan nieuwe bestandsnaam zijn aka hernoemen)
+    opties
+        -v : verbose: output bij succes
+        -i :vraag bevestiging
+        -n :automatisch niet overschrijven
+new file of directory
+    touch [filename]
+    touch Documents/ new file name : maak in die dorectory die file aan
+
+    mkdir newdirectoryname
+    mkdir Documents/newdirecoryname
+    doet niet als de directory al bestaat
+
+DO NOT sudo rm -rf /*;deletes everything 
+delete files/directories
+    rm [file or directoryname]
+    opties
+        -v : verbose: output bij succes
+        -i :vraag bevestiging
+        -r : verwijdert directories en hun inhoud
+        -f : verwijdert alles zonder prompts
+
+to compress
+    gzip 'filename'
+    optie
+        -l : toont resultaat
+
+    bzip2
+
+    xz
+
+to decompress
+    gunzip 'filename'
+    
+    bunzip2
+
+    unxz
+
+To compress and combine multiple files in one archive: tar command
+    3 modi:
+        create
+            tar -c :create a tar.archive (not compresssed yet)
+            options
+            -f 'name' : set name
+
+            oplijsten of met glob
+            tar -cf archive abc.txt def.txt or tar -cf archive*.txt
+
+            compress
+            tar -czf : using gzip    file ends .tar.gz
+            tar -cjf : using bzip    file ends .tbz
+        list
+            tar -t : list content .tar archive without extracting it
+            options
+            -f : name 
+                tar -tf archive.tar : list file names only
+            -tzf: for .tar.gz
+            -tjf: for .tbz
+        extract
+            tar -x 
+            options
+            -f: name
+                tar -xf archive.tar : extract tar archive 
+                tar -xzf : for .tar.gz
+                tar -xjf : for .tbz
+ 
+special cmd for Windows : Zip 
+     zip 'filename' 
+         -r: subdirectories
+         -l :toont archiefinhoud
+     unzip
+     zip archive.zip bestanden voor archiveren
+
+bestanden bekijken
+    cat 'filename'
+    ook om tekst naar andere filr of commamdo te sturen
+    niet geschikt voor grote bestanden; gebruik less of more om pager te gebruiken i.e more file.txt
+        pagers
+            less: zoeken in less: /'searchterm'
+    head of tail cmd: eerste/laatse (10) regels
+        option
+        -x of -nx met n het aantal regels, toont eerste/laatste regels
+        +x of +nx : toont tot/vanaf regel x
+
+    | cmd : stuurt output van een commando naar een volgende ; kan meerdere gebruiken
+        nl bestand.txt | tail 
+
+I/O Redirecting
+    > stuurt STDOUT naar een bestanden
+    >> voegt STDOUT toe naar een bestand
+    2> stuurt STDERR naar een bestand (gebruik best >>)
+    &> stuurt STDOUT & en STDERR naar een bestand
+
+    < wordt weinig gebruikt, voor STDIN ex tr 'a-z' 'A-Z'<example.txt
+
+Alfabetisch sorteren
+    sort
+    options
+    -t: bepaalt delimiter (standard is whitespace or tab): ex -t, maake , de delimiter
+    -k: bepaalt welke veld, bepaalt door delimiter
+    -n: sorteert numeriek
+    -r: reverse sortering
+
+file informatie
+    wc: toont lijnen, woorden en bytes
+    opties
+    -l toont enkel lijnen
+    -w              woorden
+    -c              bytes (komt ongeveer overeen met char)
+
+knip
+    cut: extracts specific columns, fields or characters from file or output
+    standard delimiter is tab
+    option  
+    -d : set other delimiter ex. -d, with , new delimiter
+    -f : selecteert de velden, enkel of reeks ex:
+        cut -f1,5-7 : ttont velden 1, 5, 6 en 7
+    -c : selecteert op lijnpositie ex:
+        cut -c1-11, 50- : karakters 1-11 en 50-einde
+
+zoeken/filtreren op bepaalde patroon 
+    grep (global regular expressions)
+    options
+    -c : toont enkel aantal lijnen
+    -n : toon lijnnummers
+    -v : keer resultaat om
+    -i : negeert hoofdletters
+    -w : toont enkel hele woorden
+    -u : unique 
+
+    Regular expressions of Regex: patronen vinden in tekst
+    .   : 1 enkel char                      grep c.t : zoekt alles met c letter 
+    []  : selectie / reeks char             grep c[aeiou]t : zoekt c letter in de reeks tab 
+    *   : vorige 0 of meer keer herhaald    grep ca*t: zoekt naat ct, cat, caat,caaat
+    ^   : begin van een lijn                grep ^Hello file.txt: alle files waar Hello eerst is
+    $   : einde van een lijn                grep end$ file.txt: alle file die eindigen met end
+    \   : maakt patroon letterlijk          grep 3\.14 file.txt: zoekt 3.14 i.e maakt 
+
+    best om alles in '' (zodat shell niet interpreteert)
+
+        Extended Regex
+        grep -E
+        ? vorige 0 of 1 keer aanwezig
+        + vorige 1 of meer keer herhaald
+        | een of teken: a|b betekent a of b
+
+Hard links: using inode 'copies'the file on that filesystem only
+    cmd ln file.txt hard_link.txt
+Soft links / symbolic: zoals een shortcut bij Windows; can span different file systems
+    cmd ln -s file.txt symbolic_link.txt
+    deleting the file, leaves the shortcut but will not point to a valid file
+
+Hulp nodig?
+    man cmd
+        man -f 'search term' : quick summary without fully opening manual
+        whatis cmd also same result
+
+        man -k 'search term' or cmd apropos: search for it in all available manual pages 
+        
+        if you know what section to search for: 
+        man 'section number' 'search term'
+
+        to open a man page:
+        man 'command' then optional/search term
+        navigate pages with n or N ; more or less are also possible
+            with option -k (output names and description)
+   
+    whereis cmd
+        locate binary, source code and man pages of a given cmd
+        -b                -s              -m                        options for seperate results
+    
+    which cmd
+        show exact path of executable
+    
+    locate 'search term' cmd
+        werkt met database, nieuwe bestanden = #updatedb, vindt alle locaties waar zoekterm in voorkomt
+        opties:
+            -c: toont aantal resultaten
+            -b: zoekt enkel in bestandsnamen => cobineer met '\search term voor exacte match 
+            -i: case insensitive
+    info cmd : meer details 
+        info'commamdo'
+
+    option for many commands: --help
+
+
+Network
+    Config files in
+        RHEL: /etc/sysconfig/network-scripts/
+        Debian: /etc/network/
+
+    DNS config 
+        DNS records: /etc/hosts
+        DNS servers: /etc/resolv.conf
+        Prioriteit/volgorde: /etc/nsswitch.conf
+    
+    cmds
+    ifconfig
+    ip route
+    ping (-c x)
+    netstat (ss-ta) : toont sockets
+    dig : toont ip van DNS
+    host: toont DNS van ip
+    ssh
+
+Security: een user heeft een account, die in group zit; met al dan niet privileges
+Account data in /etc/
+    /etc/passwd : bevat account, id, primaire group id en welke shell
+    /etc/shadow: bevat wachtwoorden encrypted
+    /etc/group: andere groupen behalve primaire groepen
+Root account UID 0
+Normal vanaf UID 1000
+System accounts 1-499, wachtwoord*
+Special accounts 500-999
+
+    user en group info
+        id
+        optie 
+        -G: enkel groups
+    toont alle ingelogde users
+        who 
+    systeeminfo
+        w 
+    info specifieke group opvragen
+        grep groupname /etc/group
+        getent group groupname
+
+users
+    aanmaken
+        useradd username
+        -D: show default 
+        -u : manual set UID
+        -g : manual set primary group
+        -G name, name : set other groups
+        -c'info': insert more info
+        -m :creates homedirectory for the user
+        -s :sets default shell
+
+           username recommended:
+                Begint met _ of kleine letter
+                Daarna -, _ of alfanumeriek karakter
+                Niet meer dan 16 karakters
+                Geen – als laatste karakter
+    aanpassen   
+        usermod [options] username
+        -c : comment: extra info
+        -d homedir: new homedirectory
+        -e YYYY-MM-DD: vervaldatum
+        -aG group(s) : add user to group(s)
+        -l newname
+    delete
+        userdel user
+        -r : removes homedirectory
+
+Password
+    set as
+    user: $ passwd
+    root: # passwd user 
+
+groepen
+    aanmaken
+        # groupadd groupname 
+        -g : define groupnumber (careful)
+        -r : GID < 1000
+
+            groupname recommended:
+                Begint met _ of kleine letter
+                Daarna -, _ of alfanumeriek karakter
+                Niet meer dan 16 karakters
+                Geen – als laatste karakter
+    aanpassen
+        groupmod
+        -n : past naam aan i.e : groupmod -n newname oldname
+        -g : GID change i.e : groupmod -g newnumber 
+    
+    verwijderen
+        groupdel name
+
+To find orphaned files:
+find -nogroup
+
+Files: ownership en permissions 
+
+change current user's active group to a new group
+    $ newgrp 'name'
+change group of the file (must be root or group member)
+    $ chgrp 'groupfile'
+
+Change permissions
+2 ways: symbol or number
+    symbol
+    $ chmod permissiongroup[+-=] (add, remove and set:meaning exclude all other permissions)
+        Permissiongroups:
+            u: user
+            g: group
+            o: others
+            a: alles
+            Permissie
+            r: read
+            w: write
+            x: execute
+        ex: chmod u+rx file.txt : read and execute permissions for user
+
+    numeric
+    $ chmod nnn filename
+    each n 0-7: in binary : 421 (read, write and execute) 
+        7 meaning everything
+        6 only read and write
+    first: user, then group then other
+        cmod 777 filename
+    numeriek opvragen: stat -c'%a'filename
+    
+Special directories en files
+Setuid: andere gebruikers commando's uitvoeren dan eigenaar; vooral by system utilities
+    vb: passwd permissie: -rwsr-xr-x met s voor setuid; S=notexecutable
+
+toevoegen
+    chmod u+s filename or chmod xxxx filename (+4000)
+verwijderen
+    chmod u-s filename or chmod xxxx filename (-4000)
+
+Setgid: voor groups, 2 soorten: voor files en directories
+Toevoegen:
+    $ chmod g+s filenameor $ chmod xxxx filename (+2000)
+ Verwijderen:
+    $ chmod g-s filename or $ chmod xxxx filename (-2000)
+
+Sticky bit: limiteert file deletion: enkel owner of root kunnen deleten: gebruilkt voor gedeelde directories (bv/temp)
+ Toevoegen:
+    $ chmod o+t directory or $ chmod xxxx directory (+1000)
+ Verwijderen:
+    $ chmod o-t directory or $ chmod xxxx directory (-1000)
+
+HARDWARE cmds
+    arch : display machine architecture
+    free : RAM
+    ispci: pci bus (peripheral component interconnect)
+    isusb: usb (universal serial bus)
+
+    Drives: kunnen verdeeld worden in partities (en enkel die worden gemount)
+        MBR (voor oudere machines) 
+            fdisk, cfdisk, fsdisk
+        GPT voor recentere
+            gdisk, cdisk, sdisk
+        much easier in GUI, to launch
+        cmd gparted or parted
+    Optical Drives  
+        CD, DVD,...
+        worden standaard gemount in aparte directory zoals ./mnt ./media ./var/run/media
+    Device Drivers
+        communicatie met kernel; meestal al ingebouwd, maar kan ook extern geladen worden
+        modprobe
+        dkms
+        ismod
+    Bestanden op een partitie hebben een Inode number: idnummer: cmd ls -i filename om terug te vinden
+    
+/proc: onfo over processon, hardware en kernel config
+    cmds
+    top of userfriendlier htop : realtime overzocht processen
+    free
+    mount en ummount
+
+        belangrijke bestanden: 
+        ./proc/cmdline – info voor kernel tijdens boot
+        ./proc/meminfo – info over geheugengebruik
+        ./proc/modules – info over kernelmodules
+
+Proces hierachie
+    alle processen hebben een id: PID
+    PID 1 is initialiseringsprogramme
+    vaak parent-child processen: cmd pstree voor structuur
+    ps toont alle processen afhankelijk van huidige terminal
+     optie -e toont alles
+
+Logbestanden
+    standard: /var/log
+    speciale logprocesson (daemons) zoals syslogd en journald
+        bekijken met
+        cat
+        less of more
+        journalctl (journald/systemd logs)
+        dmesg (kernel logs)
+        lastb en last (login logs)
+        controleer of het file is: cmd file

@@ -1,0 +1,67 @@
+!L3 switch
+
+enable
+conf t
+no ip domain-lookup
+banner motd & Only for Authorized or other message &
+hostname name MLS
+
+line con 0
+password cisco
+login
+logging synchronous
+exit
+
+line vty 0 4
+password cisco
+login
+logging synchronous
+exit
+
+service password-encryption
+enable secret class
+
+copy run start
+
+!enable ip routing
+ip routing
+
+!configure static routing if needed
+ip route 0.0.0.0 0.0.0.0 next hop ip
+
+!interface connected to cloud, internet or other
+interface Gigabitethernet1/0/1
+description Connection to
+ip address
+no shutdown
+
+!create vlans
+vlan 10
+name management
+vlan 20
+name operations
+vlan 30
+name sales
+vlan 40
+name native
+
+!for security
+interface Vlan1 
+no ip address
+shutdown
+exit
+
+!vlan interfaces aka SVI for inter-vlan routing
+interface vlan 10
+ip address
+
+interface vlan 20
+ip address
+
+interface vlan 30
+ip address
+
+!assign VLANs to physical interfaces
+interface Gigabitethernet1/0/2
+switchport mode trunk
+switchport trunk allowed 10,20,30, native vlan

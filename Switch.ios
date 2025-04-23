@@ -1,0 +1,226 @@
+!To activiate ipv4 & 6
+enable
+    configure terminal
+    sdm prefer dual-ipv4-and-ipv6    
+    copy run start
+    reload
+
+!basic switch and SSH
+enable
+    terminal length 0
+    conf t
+        no ip domain-lookup
+        banner motd & Only for Authorized or other message &
+        terminal length 0
+        hostname name
+        service password-encryption
+        enable secret password
+        ip domain-name domainname.com
+        crypto key generate rsa
+        1024
+        username admin secret password
+        ip ssh version 2
+
+!for security
+        interface Vlan 1
+            !description not needed
+            no ip address 
+            no ipv6 address
+            shutdown        
+
+        line con 0
+            password password
+            login
+            exec-timeout minutes space seconds
+            logging synchronous
+            exit
+
+        line vty 0 15
+            password password
+            login local
+            exec-timeout minutes space seconds
+            logging synchronous 
+            transport input ssh
+            exit
+    copy run start
+
+! to disable interfaces
+show ip int br: shutdown remaining interfaces using 
+        interface range fa0/ - x, fa0/ - x, G0/ - x
+            shutdown
+
+!to disable unused services
+show ip ports all 
+    no ip http server
+    no cdp  or in interface no cdp enable
+    no lldp or in interface no lldp transmit/receive
+
+set duplex speed and or auto-mdix if not on automaticaly
+        in interface: 
+            duplex full
+            speed 100 or other chosen speed
+            mdix auto 
+to verify mdix
+S1# show controllers ethernet-controller interface phy | include MDIX
+result should be Auto-MDIX       	:  On   [AdminState=1   Flags=0x00052248]
+
+!Vlans
+!create vlans
+        vlan 10
+            name management
+        vlan 20
+            name operations
+        vlan 30
+            name sales
+        vlan 100
+            name native
+        vlan 999
+            name unused ports
+
+!change management interface vlan; next part it will be assigned port
+        interface vlan 10
+            ip add
+            ip add ipv6 
+            description Management Vlan Switch
+            no shutdown
+            exit
+        ip default-gateway (ipaddress management vlan)
+        ip default-gateway (ipv6 address ipv6 address/prefix)
+
+!assign ports to vlan
+        interface f0/1
+            switchport mode access
+            switchport access vlan 10
+            description vlan management
+            no shutdown 
+
+        interface f0/2
+            switchport mode access
+            switchport access vlan 20
+            description vlan operations
+            no shutdown 
+
+        interface f0/3
+            switchport mode access
+            switchport access vlan 30
+            description vlan sales
+            no shutdown 
+
+        !assign ports to unused vlan and shutdown
+        interface range f0/ x - x, f0-x/ x, g0/x - x
+            switchport mode access
+            switchport access vlan 999
+            shutdown
+
+!Etherchannel
+!   all interfaces same speed, same duplex mode, same VLAN or trunk; supports allowed range of the configured interfaces.
+
+!LACP config
+        interface range Fa0/1 - 2
+!   create port channel interface wth id and mode active
+            channel-group 1 mode active/passive
+!if you don't know which mode: use channel-group 1 mode ?
+        interface port-channel 1
+            switchport mode trunk
+            switchport nonegotiate
+
+!PAgP config
+        interface range Fa0/1 - 2
+            channel-group 1 mode on/desirable/auto
+        !if you don't know which mode: use channel-group 1 mode ?
+        interface port-channel 1
+            switchport mode trunk
+            switchport nonegotiate
+!Example load balancing by source-destination IP (adjust as necessary)
+            port-channel load-balance src-dst-ip   
+
+!configure trunk ports i.e to router 
+        interface f0/X
+            switchport mode trunk
+        !for security disable dtp
+            switchport nonegotiate
+            switchport trunk native vlan 999
+            switchport trunk allowed (all vlan made)
+            description Switch trunk port f0/x
+            no shutdown
+!STP
+!set port priority
+        interface G0/0/0
+            spanning-tree port-proiority 0-240
+!all switches will follow the timer settings root switch
+!set hello time
+            spanning-tree hello-time 1-10
+!set forward time
+            spanning-tree forward-time 4-30
+!set max age timer
+            spanning-tree max-age 6-40
+!Set all 3 timers in one command
+            spanning-tree hello-time 2 forward-time 15 max-age 20
+
+!Implement port security
+!basic security: If not done already shutdown unused interfaces
+
+!Mitigate MAC Address Table Attacks
+!You can set both manual and static addresses on the same port, as long as the limits allows it.
+        !every port in either switchport mode access or trunk 
+        interface f0/x
+            switchport port-security
+    !limit and learn MAC addresses
+            switchport port-security maximum 1-8192
+    !how switch learns about MAC addresses on a secure port
+    !manual config static mac adres(ses)
+            switchport port-security mac-address aabbcc
+    !Dynamically Learned
+            !nothins is required after activating port security: device attached to port is registered but not saved 
+    !Dynamically Learned – Sticky: saved in config
+            switchport port-security mac-address sticky
+
+!security aging: dynamic has to follow the default or global setting while for static you can set per port
+            switchport port-security aging  {static | time min 0-1440 |     type   {absolute | inactivity }}
+
+!Port Security Violation Modes
+            switchport port-security violation {  protect | restrict |  shutdown}
+        shutdown: the default, port enters the error-disabled state, turns off port LED and sends syslog
+        !must be re-enabled bu shutdown and no shutdown cmds
+        restrict: drop packets with unknown source addresses until mac value isnt maxed out (by either device dropping ou or increasing max value)
+        !The security violation count increases and generates a syslog
+        protect : least secure: drop packets with unknown source addresses until mac value isnt maxed out (by either device dropping ou or increasing max value)
+        !no syslog is sent 
+    
+!Mitigate VLAN hopping attacks: steps have alreasy been taken: i.e not using vlan 1, swictport mode access, no dtp
+
+!Mitigate DHCP attacks & for effiency ARP attacks as well
+!Enable DHCP snooping
+        exit
+    ip dhcp snooping
+!in trusted (most likely internal) ports enable snooping and DAI
+    interface (range) f0/X  
+        ip dhcp snooping trust
+        ip arp inspection trust
+!Limit the number of DHCP discovery messages that can be received per second on untrusted ports
+    interface range f0/ not trusted
+        ip dhcp snooping limit rate 1-500 (lower is more secure) 
+!Enable DHCP snooping and DAI by VLAN, or by a range of VLANs
+        exit
+    ip dhcp snooping vlan x,x-x
+    ip arp inspection vlan x, x-x
+    ip arp inspection validate src-mac| dst-mac | ip
+!if using multiple all on the same line or else overwrite
+    ip arp inspection validate src-mac dst-mac ip
+
+!Mitigate STP attacks
+!PortFast
+        interface f0/x
+            spanning-tree portfast
+!if no end-users ports, in global config
+        spanning-tree portfast default
+
+!BPDU Guard (always combine with PortFast)
+        interface f0/x
+            spanning-tree bpduguard enable 
+!if no end-users ports, in global config
+    spanning-tree portfast bpduguard default
+
+!re enable the port using:
+        interface f0/x
+            errdisable recovery cause bpduguard 

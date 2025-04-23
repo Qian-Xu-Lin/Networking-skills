@@ -1,0 +1,74 @@
+sh helloworld.txt : eenvoudige script om tekstbestand te maken met Hello world
+
+shebang #! :wordt gebruikt om specifieke shell aan te duiden; enkel met rechtstreekse uitvoereing
+ex van shell/uitvoerprogramma:
+#!/bin/sh
+#!/bin/bash
+#!/bin/python3
+
+Zie nano of vim voor text editor
+
+Basics:
+Variabelen
+Conditionals
+Loops
+
+Variabelen: 
+    INSTRUCTEUR="Ian"
+    echo 'Mijn instructeur is $INSTRUCTEUR
+kan ook commando output aan variablen toewijzen
+kan ook invoer vragen met read
+    read name
+kan argumenten gebruiken, volgens nummer
+    echo "Hello$1"
+belangrijk om te weten in welke directory en de path: pwd cmd: print working directory
+
+exit code aka heeft cmd gefaald of uitgevoerd
+    opvragen met $?: echo $?
+    kan zelf instellen welke exitcode script teruggeeft: exit 0-255 (0 is meestal default for succes)
+    ex: ls /notexistingfolder
+        echo $?
+        output: ls: cant access : no such folder
+                2
+
+Conditionals
+    if
+        ex: if cmd; then
+            do sth if cmd 
+            exit code 0 (succeed)
+            or 
+            exit code 1 (fail)
+            .fi
+to test 
+    test -f filename or [-f filename] and be aware of spacebar
+
+    elif or if else
+        ex: if ["$1="9.9.9.9"]; then
+                echo "Quad9"
+            elif ["$1="8.8.8.8"]; then
+                echo "Google"
+            else
+                echo"iets anders"
+            .fi
+
+    Case statement
+        ex: case"$1" in
+            Jo|Chris)
+                echo "Windows"
+            Ian)
+                echo "Linux"
+            *)
+                echo "MacOs"
+            esac
+Loops : for of while loops 
+    for loop ex
+            NAMEN="JO Chris Stefan"
+            for N in $NAMEN; do
+                echo "$N is een instructeur"
+            done 
+    while loop ex
+            i=0
+            while [$i-iT 10]; do    
+                echo "$1"
+                i=$(($i+1))
+            done
